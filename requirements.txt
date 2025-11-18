@@ -1,0 +1,5 @@
+Flask==2.3.2               # Web framework for API endpoints
+SQLAlchemy==2.0.22         # ORM to interact with the database
+psycopg2-binary==2.9.7     # PostgreSQL driver
+python-dotenv==1.0.0       # Load environment variables from .env
+pytest==7.4.0              # For running tests

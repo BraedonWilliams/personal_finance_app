@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, func, Integer, String, Column, DateTime
 from sqlalchemy.orm import relationship
-from app.db.database import Base
+from ..database import Base
 
 
 class User(Base):

@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, func, Numeric, Integer, String, Float, Column, DateTime, Date, Boolean, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+from ..database import Base
 
 class Category(Base):
     __tablename__='categories'

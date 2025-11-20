@@ -1,20 +1,23 @@
-Auth
-1. Sign Up
+# API Endpoints
 
-URL: /auth/signup
-Method: POST
-Description: Creates a new user account.
+## Auth
 
-Request Body (JSON):
+### 1. Sign Up
+
+**URL:** `/auth/signup`  
+**Method:** `POST`  
+**Description:** Creates a new user account.
+
+**Request Body (JSON):**
 
 {
   "username": "example",
   "email": "example@example.com",
   "password": "password123"
 }
-
-
 Response (JSON):
+
+
 
 {
   "user_id": 1,
@@ -22,8 +25,6 @@ Response (JSON):
   "email": "example@example.com",
   "created_at": "2025-11-17T17:30:00Z"
 }
-
-
 Errors:
 
 400 → Missing required field
@@ -31,27 +32,26 @@ Errors:
 409 → Username or email already exists
 
 2. Login
-
 URL: /auth/login
 Method: POST
 Description: Authenticates a user with email and password.
 
 Request Body (JSON):
 
+
+
 {
   "email": "example@example.com",
   "password": "password123"
 }
-
-
 Response (JSON):
+
+
 
 {
   "message": "Login successful",
   "user_id": 1
 }
-
-
 Errors:
 
 400 → Missing required field
@@ -60,21 +60,22 @@ Errors:
 
 Users
 1. Create User
-
 URL: /users
 Method: POST
 Description: Creates a new user account.
 
 Request Body (JSON):
 
+
+
 {
   "username": "example",
   "email": "example@example.com",
   "password": "password123"
 }
-
-
 Response (JSON):
+
+
 
 {
   "user_id": 1,
@@ -82,8 +83,6 @@ Response (JSON):
   "email": "example@example.com",
   "created_at": "2025-11-17T17:30:00Z"
 }
-
-
 Errors:
 
 400 → Missing required field
@@ -91,12 +90,13 @@ Errors:
 409 → Username or email already exists
 
 2. Get User by ID
-
 URL: /users/:id
 Method: GET
 Description: Retrieves user information by user ID.
 
 Response (JSON):
+
+
 
 {
   "user_id": 1,
@@ -104,27 +104,26 @@ Response (JSON):
   "email": "example@example.com",
   "created_at": "2025-11-17T17:30:00Z"
 }
-
-
 Errors:
 
 404 → User not found
 
 3. Update User
-
 URL: /users/:id
 Method: PATCH
 Description: Updates user information (username, email, or password).
 
 Request Body (JSON):
 
+
+
 {
   "username": "example2",
   "email": "example2@example.com"
 }
-
-
 Response (JSON):
+
+
 
 {
   "user_id": 1,
@@ -132,8 +131,6 @@ Response (JSON):
   "email": "example2@example.com",
   "created_at": "2025-11-17T17:30:00Z"
 }
-
-
 Errors:
 
 400 → Invalid input
@@ -143,29 +140,29 @@ Errors:
 409 → Username or email already exists
 
 4. Delete User
-
 URL: /users/:id
 Method: DELETE
 Description: Deletes a user account and all associated accounts, transactions, and budgets.
 
 Response (JSON):
 
+
+
 {
   "message": "User successfully deleted"
 }
-
-
 Errors:
 
 404 → User not found
 
 5. Get All Accounts for a User
-
 URL: /users/:id/accounts
 Method: GET
-Description: Retrieves all financial accounts for a specific user.
+Description: Retrieves all financial accounts for a specific user. Useful for consolidated balances and budgets.
 
 Response (JSON):
+
+
 
 [
   {
@@ -187,19 +184,18 @@ Response (JSON):
     "created_at": "2025-11-17T17:31:00Z"
   }
 ]
-
-
 Errors:
 
 404 → User not found
 
 6. Get All BudgetGoals for a User
-
 URL: /users/:id/budget-goals
 Method: GET
-Description: Retrieves all budget goals for a specific user.
+Description: Retrieves all budget goals for a specific user, including progress across all accounts.
 
 Response (JSON):
+
+
 
 [
   {
@@ -242,19 +238,18 @@ Response (JSON):
     ]
   }
 ]
-
-
 Errors:
 
 404 → User not found
 
 7. Get All Transactions for a User
-
 URL: /users/:id/transactions
 Method: GET
 Description: Retrieves all transactions for a specific user across all accounts.
 
 Response (JSON):
+
+
 
 [
   {
@@ -294,19 +289,19 @@ Response (JSON):
     "notes": ""
   }
 ]
-
-
 Errors:
 
 404 → User not found
 
 Accounts
 1. Create Account
-
 URL: /accounts
 Method: POST
+Description: Creates a new financial account for a user.
 
 Request Body (JSON):
+
+
 
 {
   "user_id": 1,
@@ -314,9 +309,9 @@ Request Body (JSON):
   "account_type": "checking",
   "starting_balance": 1000
 }
-
-
 Response (JSON):
+
+
 
 {
   "account_id": 1,
@@ -327,18 +322,18 @@ Response (JSON):
   "current_balance": 1000,
   "created_at": "2025-11-17T17:30:00Z"
 }
-
-
 Errors:
 
 400 → Missing required field
 
 2. Get Account by ID
-
 URL: /accounts/:id
 Method: GET
+Description: Retrieves account information by account ID.
 
 Response (JSON):
+
+
 
 {
   "account_id": 1,
@@ -349,25 +344,25 @@ Response (JSON):
   "current_balance": 1000,
   "created_at": "2025-11-17T17:30:00Z"
 }
-
-
 Errors:
 
 404 → Account not found
 
 3. Update Account
-
 URL: /accounts/:id
 Method: PATCH
+Description: Updates account details such as account name or type.
 
 Request Body (JSON):
+
+
 
 {
   "account_name": "Chase Checking Updated"
 }
-
-
 Response (JSON):
+
+
 
 {
   "account_id": 1,
@@ -378,8 +373,6 @@ Response (JSON):
   "current_balance": 1000,
   "created_at": "2025-11-17T17:30:00Z"
 }
-
-
 Errors:
 
 400 → Invalid input
@@ -387,36 +380,38 @@ Errors:
 404 → Account not found
 
 4. Delete Account
-
 URL: /accounts/:id
 Method: DELETE
+Description: Deletes an account and all associated transactions and budget goals.
 
 Response (JSON):
+
+
 
 {
   "message": "Account successfully deleted"
 }
-
-
 Errors:
 
 404 → Account not found
 
 Categories
 1. Create Category
-
 URL: /categories
 Method: POST
+Description: Creates a new category (income or expense).
 
 Request Body (JSON):
+
+
 
 {
   "category_name": "Groceries",
   "category_type": "expense"
 }
-
-
 Response (JSON):
+
+
 
 {
   "category_id": 1,
@@ -424,18 +419,18 @@ Response (JSON):
   "category_type": "expense",
   "created_at": "2025-11-17T17:30:00Z"
 }
-
-
 Errors:
 
 400 → Missing required field
 
 2. Get Category by ID
-
 URL: /categories/:id
 Method: GET
+Description: Retrieves category information by ID.
 
 Response (JSON):
+
+
 
 {
   "category_id": 1,
@@ -443,25 +438,25 @@ Response (JSON):
   "category_type": "expense",
   "created_at": "2025-11-17T17:30:00Z"
 }
-
-
 Errors:
 
 404 → Category not found
 
 3. Update Category
-
 URL: /categories/:id
 Method: PATCH
+Description: Updates category details.
 
 Request Body (JSON):
+
+
 
 {
   "category_name": "Supermarket"
 }
-
-
 Response (JSON):
+
+
 
 {
   "category_id": 1,
@@ -469,8 +464,6 @@ Response (JSON):
   "category_type": "expense",
   "created_at": "2025-11-17T17:30:00Z"
 }
-
-
 Errors:
 
 400 → Invalid input
@@ -478,28 +471,30 @@ Errors:
 404 → Category not found
 
 4. Delete Category
-
 URL: /categories/:id
 Method: DELETE
+Description: Deletes a category.
 
 Response (JSON):
+
+
 
 {
   "message": "Category successfully deleted"
 }
-
-
 Errors:
 
 404 → Category not found
 
 BudgetGoals
 1. Create BudgetGoal
-
 URL: /budget-goals
 Method: POST
+Description: Creates a new budget goal for a category.
 
 Request Body (JSON):
+
+
 
 {
   "goal_name": "Groceries",
@@ -508,9 +503,9 @@ Request Body (JSON):
   "start_date": "2025-11-01",
   "end_date": "2025-11-30"
 }
-
-
 Response (JSON):
+
+
 
 {
   "goal_id": 1,
@@ -521,18 +516,18 @@ Response (JSON):
   "end_date": "2025-11-30",
   "is_complete": false
 }
-
-
 Errors:
 
 400 → Missing required field
 
 2. Get BudgetGoal by ID
-
 URL: /budget-goals/:id
 Method: GET
+Description: Retrieves a budget goal by ID.
 
 Response (JSON):
+
+
 
 {
   "goal_id": 1,
@@ -543,25 +538,25 @@ Response (JSON):
   "end_date": "2025-11-30",
   "is_complete": false
 }
-
-
 Errors:
 
 404 → BudgetGoal not found
 
 3. Update BudgetGoal
-
 URL: /budget-goals/:id
 Method: PATCH
+Description: Updates budget goal details.
 
 Request Body (JSON):
+
+
 
 {
   "target_amount": 600
 }
-
-
 Response (JSON):
+
+
 
 {
   "goal_id": 1,
@@ -572,8 +567,6 @@ Response (JSON):
   "end_date": "2025-11-30",
   "is_complete": false
 }
-
-
 Errors:
 
 400 → Invalid input
@@ -581,36 +574,37 @@ Errors:
 404 → BudgetGoal not found
 
 4. Delete BudgetGoal
-
 URL: /budget-goals/:id
 Method: DELETE
+Description: Deletes a budget goal.
 
 Response (JSON):
+
+
 
 {
   "message": "BudgetGoal successfully deleted"
 }
-
-
 Errors:
 
 404 → BudgetGoal not found
 
 AccountBudgetGoals
 1. Update Progress
-
 URL: /account-budget-goals/:id/progress
 Method: PATCH
 Description: Updates progress of a budget goal for a specific account.
 
 Request Body (JSON):
 
+
+
 {
   "current_progress": 250
 }
-
-
 Response (JSON):
+
+
 
 {
   "account_budget_goal_id": 1,
@@ -618,8 +612,6 @@ Response (JSON):
   "account_id": 12,
   "current_progress": 250
 }
-
-
 Errors:
 
 404 → AccountBudgetGoal not found

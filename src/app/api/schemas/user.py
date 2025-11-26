@@ -18,13 +18,18 @@ class UserRead(BaseModel):
         from_attributes = True
 
 
-#login(get)
+#login(post...sending info)
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
 
-#change username or email (patch)
+""" #change username or email (patch)
 class UserUpdate(BaseModel):
     username: str | None = None
     email: EmailStr | None = None
+
+#change password (also patch)
+class PassUpdate(BaseModel):
+    new_password: str
+    old_password: str """

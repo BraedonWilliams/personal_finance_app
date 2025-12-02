@@ -86,3 +86,24 @@ def delete_budget(budget_id: int, db: Session = Depends(get_db)):
     db.delete(budget)
     db.commit()
     return None
+
+@router.get("/{budget_id}/progress")
+def get_budget_progress(budget_id: int, db: Session = Depends(get_db)):
+    budget = db.query(Budget).filter(Budget.id == budget_id).first()
+    if not budget:
+        raise HTTPException(404, "Budget not found")
+
+    percent_used = (
+        (budget.current_spent / budget.target_amount) * 100
+        if budget.target_amount > 0 else 0
+    )
+
+    return {
+        "budget_id": budget.id,
+        "name": budget.name,
+        "target_amount": budget.target_amount,
+        "current_spent": budget.current_spent,
+        "remaining": budget.remaining,
+        "percent_used": round(percent_used, 2),
+    }
+

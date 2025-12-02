@@ -30,6 +30,4 @@ class TransactionRead(TransactionBase):
     account_id: int
     category_id: Optional[int] = None
 
-    class Config:
-        from_attributes = True
-        orm_mode = True
+

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-import datetime
+from datetime import datetime
 
 #Create a new user
 class UserCreate(BaseModel):
@@ -11,25 +11,13 @@ class UserCreate(BaseModel):
 class UserRead(BaseModel):
     id: int
     username: str
-    email: EmailStr
-    created_at: str
+    email: str
+    created_at: datetime
 
-    class Config:
-        from_attributes = True
-
+    model_config = {"from_attributes": True}
 
 #login(post...sending info)
 class UserLogin(BaseModel):
-    username: str #so email or username can be used in logging in
+    email: str #so email or username can be used in logging in
     password: str
 
-
-""" #change username or email (patch)
-class UserUpdate(BaseModel):
-    username: str | None = None
-    email: EmailStr | None = None
-
-#change password (also patch)
-class PassUpdate(BaseModel):
-    new_password: str
-    old_password: str """

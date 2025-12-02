@@ -17,14 +17,7 @@ def get_db():
     finally:
         db.close()
 
-
-# IMPORT ALL MODELS HERE
-from src.app.db.models import (
-    account,
-    category,
-    budget,
-    transaction,
-    account_budget
-)
+# IMPORTANT: Import ALL models here
+from src.app.db.models import User, Account, Category, Budget, Transaction, AccountBudget
 
 Base.metadata.create_all(bind=engine)

@@ -33,6 +33,4 @@ class AccountRead(BaseModel):
     starting_balance: float
     current_balance: float
 
-    class Config: #v1 & 2 compatible
-        from_attributes = True
-        orm_mode = True
+    

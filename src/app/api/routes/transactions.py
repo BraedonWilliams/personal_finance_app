@@ -28,22 +28,15 @@ def apply_balance_change(
     is_income: bool,
     reverse: bool = False,
 ) -> None:
-    """
-    reverse=False → apply normally
-    reverse=True  → undo (used for update/delete)
-    """
 
-    # Ensure float
     amount = float(amount)
 
     if reverse:
-        # Undo previous transaction
         if is_income:
             account.current_balance -= amount
         else:
             account.current_balance += amount
     else:
-        # Apply new transaction
         if is_income:
             account.current_balance += amount
         else:
@@ -58,7 +51,6 @@ def apply_balance_change(
 @router.post("/", response_model=TransactionRead, status_code=status.HTTP_201_CREATED)
 def create_transaction(payload: TransactionCreate, db: Session = Depends(get_db)):
 
-    # Get the account to update balance
     account = db.query(Account).filter(Account.id == payload.account_id).first()
     if not account:
         raise HTTPException(404, "Account not found")
@@ -75,7 +67,7 @@ def create_transaction(payload: TransactionCreate, db: Session = Depends(get_db)
 
     db.add(transaction)
 
-    # 🔥 Update the account balance
+    # 🔥 Update account
     apply_balance_change(
         db,
         account=account,
@@ -84,21 +76,13 @@ def create_transaction(payload: TransactionCreate, db: Session = Depends(get_db)
         reverse=False,
     )
 
-    # 🔥 Update any linked budget for this category
-    update_budget_progress(
-        db=db,
-        category_id=payload.category_id,
-        amount=float(payload.amount),
-        is_income=payload.is_income,
-        reverse=False,
-    )
-
     db.commit()
     db.refresh(transaction)
+
+    # 🔥 FIXED FOR NEW BUDGET LOGIC
+    update_budget_progress(db, transaction)
+
     return transaction
-
-
-
 
 
 # -------------------------
@@ -106,16 +90,9 @@ def create_transaction(payload: TransactionCreate, db: Session = Depends(get_db)
 # -------------------------
 @router.get("/{transaction_id}", response_model=TransactionRead)
 def get_transaction(transaction_id: int, db: Session = Depends(get_db)):
-    transaction = (
-        db.query(Transaction)
-        .filter(Transaction.id == transaction_id)
-        .first()
-    )
+    transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
     if not transaction:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Transaction not found",
-        )
+        raise HTTPException(404, "Transaction not found")
     return transaction
 
 
@@ -129,21 +106,16 @@ def update_transaction(
     db: Session = Depends(get_db),
 ):
 
-    # Fetch existing transaction
     transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
     if not transaction:
         raise HTTPException(404, "Transaction not found")
 
-    # --- OLD values (before update) ---
+    # OLD values before update
     old_account = db.query(Account).filter(Account.id == transaction.account_id).first()
-    if not old_account:
-        raise HTTPException(404, "Account not found")
-
     old_amount = float(transaction.amount)
     old_is_income = transaction.is_income
-    old_category_id = transaction.category_id
 
-    # 🔥 Undo the old transaction effect on OLD account
+    # 🔥 Undo old account effect
     apply_balance_change(
         db,
         account=old_account,
@@ -152,29 +124,21 @@ def update_transaction(
         reverse=True,
     )
 
-    # 🔥 Undo the old effect on any budget (if expense + has category)
-    update_budget_progress(
-        db=db,
-        category_id=old_category_id,
-        amount=old_amount,
-        is_income=old_is_income,
-        reverse=True,
-    )
+    db.commit()
+    db.refresh(transaction)
 
-    # --- Apply incoming updates to the transaction object ---
+    # 🔥 FIXED FOR NEW BUDGET LOGIC
+    update_budget_progress(db, transaction)
+
+    # Apply updates
     update_data = payload.dict(exclude_unset=True)
     for key, value in update_data.items():
         setattr(transaction, key, value)
 
-    # Re-fetch account (in case account_id changed)
-    new_account = old_account
-    if payload.account_id is not None and payload.account_id != old_account.id:
-        new_account = db.query(Account).filter(Account.id == payload.account_id).first()
-        if not new_account:
-            raise HTTPException(404, "New account not found")
-        transaction.account_id = payload.account_id
+    # Re-fetch new account if it changed
+    new_account = db.query(Account).filter(Account.id == transaction.account_id).first()
 
-    # 🔥 Apply NEW transaction effect to NEW account
+    # Apply NEW account change
     apply_balance_change(
         db,
         account=new_account,
@@ -183,17 +147,12 @@ def update_transaction(
         reverse=False,
     )
 
-    # 🔥 Apply NEW effect to budget (if applicable)
-    update_budget_progress(
-        db=db,
-        category_id=transaction.category_id,
-        amount=float(transaction.amount),
-        is_income=transaction.is_income,
-        reverse=False,
-    )
-
     db.commit()
     db.refresh(transaction)
+
+    # 🔥 FIXED FOR NEW BUDGET LOGIC
+    update_budget_progress(db, transaction)
+
     return transaction
 
 
@@ -208,10 +167,8 @@ def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
         raise HTTPException(404, "Transaction not found")
 
     account = db.query(Account).filter(Account.id == transaction.account_id).first()
-    if not account:
-        raise HTTPException(404, "Account not found")
 
-    # 🔥 Reverse the balance effect on account
+    # 🔥 Undo account effect
     apply_balance_change(
         db,
         account=account,
@@ -220,38 +177,38 @@ def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
         reverse=True,
     )
 
-    # 🔥 Reverse the budget effect
-    update_budget_progress(
-        db=db,
-        category_id=transaction.category_id,
-        amount=float(transaction.amount),
-        is_income=transaction.is_income,
-        reverse=True,
-    )
+    db.commit()
+
+    # 🔥 FIXED FOR NEW BUDGET LOGIC
+    update_budget_progress(db, transaction)
 
     db.delete(transaction)
     db.commit()
+
     return None
 
+
+# -------------------------
+# List Transactions
+# -------------------------
 @router.get("/", response_model=List[TransactionRead])
 def list_transactions(
     user_id: int,
     account_id: Optional[int] = None,
     category_id: Optional[int] = None,
     is_income: Optional[bool] = None,
-    min_date: Optional[str] = None,       # YYYY-MM-DD
-    max_date: Optional[str] = None,       # YYYY-MM-DD
+    min_date: Optional[str] = None,
+    max_date: Optional[str] = None,
     min_amount: Optional[float] = None,
     max_amount: Optional[float] = None,
     search: Optional[str] = None,
-    sort: Optional[str] = "date_desc",    # 'date_desc', 'date_asc', 'amount_desc', 'amount_asc'
+    sort: Optional[str] = "date_desc",
     limit: int = 100,
     offset: int = 0,
     db: Session = Depends(get_db),
 ):
     query = db.query(Transaction).filter(Transaction.user_id == user_id)
 
-    # ---- FILTERING ----
     if account_id is not None:
         query = query.filter(Transaction.account_id == account_id)
 
@@ -273,7 +230,6 @@ def list_transactions(
     if max_amount is not None:
         query = query.filter(Transaction.amount <= max_amount)
 
-    # ---- SEARCH (description & category name) ----
     if search:
         search_term = f"%{search.lower()}%"
         query = (
@@ -284,7 +240,6 @@ def list_transactions(
                  )
         )
 
-    # ---- SORTING ----
     sort_map = {
         "date_desc": Transaction.date.desc(),
         "date_asc": Transaction.date.asc(),
@@ -293,7 +248,4 @@ def list_transactions(
     }
     query = query.order_by(sort_map.get(sort, Transaction.date.desc()))
 
-    # ---- PAGINATION ----
-    transactions = query.offset(offset).limit(limit).all()
-    return transactions
-
+    return query.offset(offset).limit(limit).all()

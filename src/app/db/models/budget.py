@@ -24,4 +24,9 @@ class Budget(Base):
     # relationships
     user = relationship("User", back_populates="budgets")
     category = relationship("Category", back_populates="goals")
-    account_links = relationship("AccountBudget", back_populates="budget")
+    account_budgets = relationship(
+        "AccountBudget",
+        back_populates="budget",
+        cascade="all, delete-orphan"
+    )
+

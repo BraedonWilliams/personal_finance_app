@@ -4,6 +4,10 @@ from typing import List
 
 from src.app.db.database import get_db
 from src.app.db.models.budget import Budget
+from src.app.db.models.account import Account
+from src.app.db.models.account_budget import AccountBudget
+
+
 from src.app.api.schemas.budget import (
     BudgetCreate,
     BudgetRead,
@@ -16,6 +20,7 @@ router = APIRouter(prefix="/budgets", tags=["Budgets"])
 @router.post("/", response_model=BudgetRead, status_code=status.HTTP_201_CREATED)
 def create_budget(payload: BudgetCreate, db: Session = Depends(get_db)):
 
+    # 1. Create the Budget
     budget = Budget(
         name=payload.name,
         target_amount=payload.target_amount,
@@ -27,7 +32,27 @@ def create_budget(payload: BudgetCreate, db: Session = Depends(get_db)):
     db.add(budget)
     db.commit()
     db.refresh(budget)
+
+    # 2. Get all accounts owned by this user
+    user_accounts = db.query(Account).filter(Account.user_id == payload.user_id).all()
+
+    # 3. Create AccountBudget rows for each account
+    for account in user_accounts:
+        link = AccountBudget(
+            account_id=account.id,
+            budget_id=budget.id,
+            current_progress=0.0
+        )
+        db.add(link)
+
+    db.commit()  # save account-budget links
+
+    # Optional but recommended
+    db.refresh(budget)
+
     return budget
+
+
 
 
 

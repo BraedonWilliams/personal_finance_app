@@ -1,50 +1,33 @@
 from src.app.db.models.budget import Budget
+from src.app.db.models.account_budget import AccountBudget
 
 
-def update_budget_progress(
-    db,
-    category_id: int | None,
-    amount: float,
-    is_income: bool,
-    reverse: bool = False,
-):
-    """
-    Updates the budget totals for the given category.
-
-    - Income does NOT affect budgets.
-    - reverse=False → apply transaction normally (expense adds to current_spent).
-    - reverse=True  → undo transaction (used for update/delete).
-    """
-
-    # No category, nothing to do
-    if category_id is None:
+def update_budget_progress(db, transaction):
+    # Only update budgets for expenses
+    if transaction.is_income:
         return
 
-    # Income transactions don't count toward spending
-    if is_income:
-        return
+    # Find the budget linked to this transaction
+    budget = db.query(Budget).filter(
+        Budget.category_id == transaction.category_id
+    ).first()
 
-    # Find the first budget tied to this category (MVP: one budget per category)
-    budget = (
-        db.query(Budget)
-        .filter(Budget.category_id == category_id)
-        .first()
-    )
     if not budget:
         return
 
-    # Ensure amount is positive for math
-    amount = float(amount)
+    # Add to overall budget progress
+    budget.current_spent += float(transaction.amount)
+    budget.remaining = budget.target_amount - budget.current_spent
 
-    if reverse:
-        budget.current_spent -= amount
-    else:
-        budget.current_spent += amount
+    # Update per-account progress
+    acc_budget = db.query(AccountBudget).filter(
+        AccountBudget.account_id == transaction.account_id,
+        AccountBudget.budget_id == budget.id
+    ).first()
 
-    # Clamp to zero just in case
-    if budget.current_spent < 0:
-        budget.current_spent = 0.0
+    if acc_budget:
+        acc_budget.current_progress += float(transaction.amount)
 
-    budget.remaining = float(budget.target_amount) - budget.current_spent
+    db.commit()
+    db.refresh(budget)
 
-    db.add(budget)

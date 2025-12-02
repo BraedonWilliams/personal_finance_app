@@ -13,3 +13,5 @@ class User(Base):
 
     #Relationships: one user has many accounts
     accounts = relationship('Account', back_populates='user')
+    categories = relationship("Category", back_populates="user")
+    budgets = relationship("Budget", back_populates="user")

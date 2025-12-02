@@ -5,7 +5,7 @@ from pwdlib import PasswordHash
 
 from src.app.db.database import get_db
 from src.app.db.models.user import User
-from src.app.api.schemas.user import UserCreate, UserLogin, UserRead, UserUpdate, PassUpdate ##gotta make
+from src.app.api.schemas.user import UserCreate, UserLogin, UserRead # UserUpdate, PassUpdate gotta make
 #from src.app.utils.security import hash_password
 #remember to go into security and delete that since you just did pwdlib instead of making your own
 
@@ -32,7 +32,7 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
         )
 
     # Hash the password
-    hashed_pw = pswd_hash(payload.password)
+    hashed_pw = pswd_hash.hash(payload.password)
 
     # Create user object
     new_user = User(

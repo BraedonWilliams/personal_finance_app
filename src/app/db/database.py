@@ -1,10 +1,13 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# This is where you'll put the enginge, SessionLocal, Base, Get_db() ... #
+engine = create_engine(
+    'postgresql+psycopg2://braedon:pfinbw@localhost/personal_finance',
+    echo=True
+)
 
-engine = create_engine('postgresql+psycopg2://braedon:pfinbw@localhost/personal_finance', echo=True)
 Base = declarative_base()
+
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 def get_db():
@@ -13,3 +16,15 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+# IMPORT ALL MODELS HERE
+from src.app.db.models import (
+    account,
+    category,
+    budget,
+    transaction,
+    account_budget
+)
+
+Base.metadata.create_all(bind=engine)

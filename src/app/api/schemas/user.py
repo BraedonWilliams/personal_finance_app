@@ -20,7 +20,7 @@ class UserRead(BaseModel):
 
 #login(post...sending info)
 class UserLogin(BaseModel):
-    email: EmailStr
+    username: str #so email or username can be used in logging in
     password: str
 
 

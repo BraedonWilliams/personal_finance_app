@@ -1,19 +1,21 @@
-from sqlalchemy import create_engine, func, Numeric, Integer, String, Float, Column, DateTime, Date, Boolean, ForeignKey
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, func
+from sqlalchemy.orm import relationship
 from ..database import Base
 
-class Budget(Base): #for budget goals
-    __tablename__='budgets'    
-    id = Column(Integer, primary_key=True, nullable = False, index = True)
-    name = Column(String, nullable = False)
-    target_amnt = Column(Numeric(12, 2), nullable = False)
-    start_date = Column(Date, nullable = False)
-    end_date = Column(Date, nullable = False)
-    is_complete = Column(Boolean, nullable = False)
+class Budget(Base):
+    __tablename__ = "budgets"
 
-    #Foreign Keys
-    category_id=Column(Integer, ForeignKey('categories.id'))
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    target_amount = Column(Float, nullable=False)
+    period = Column(String, nullable=False)  # monthly / weekly / yearly
 
-    #Relationships
-    category = relationship('Category', back_populates='goals')
-    account_links = relationship('AccountBudget', back_populates='budget')
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    # relationships
+    user = relationship("User", back_populates="budgets")
+    category = relationship("Category", back_populates="goals")
+    account_links = relationship("AccountBudget", back_populates="budget")

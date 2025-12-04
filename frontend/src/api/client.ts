@@ -100,3 +100,24 @@ export const getTransactionsRequest = (userId: number, limit = 50) =>
 
 export const createTransactionRequest = (data: CreateTransactionPayload) =>
   api.post("/transactions", data);
+
+/*
+  =====================
+      CHART STUFF
+  =====================
+*/
+export const getDashboardSummaryRequest = (userId: number) =>
+  api.get(`/dashboard/summary?user_id=${userId}`);
+
+export const getDashboardByCategoryRequest = (userId: number) =>
+  api.get(`/dashboard/by-category?user_id=${userId}`);
+
+export const getDashboardByMonthRequest = (userId: number) =>
+  api.get(`/dashboard/by-month?user_id=${userId}`);
+
+export const getBudgetSummaryRequest = (userId: number) =>
+  api.get(`/dashboard/budget-summary`, {
+    params: { user_id: userId },
+  });
+
+

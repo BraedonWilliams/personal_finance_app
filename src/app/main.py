@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import all routers
-from src.app.api.routes import auth, accounts, categories, budgets, transactions
+from src.app.api.routes import auth, accounts, categories, budgets, transactions, dashboard
 from src.app.api.routes.summary import router as summary_router
 
 app = FastAPI(
@@ -33,6 +33,7 @@ app.include_router(categories.router)
 app.include_router(budgets.router)
 app.include_router(transactions.router)
 app.include_router(summary_router)
+app.include_router(dashboard.router)
 
 # ---------------------------
 # Root endpoint
